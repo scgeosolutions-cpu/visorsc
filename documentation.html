@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Documentación del Visor de Mapas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: #f3f5f7;
+            color: #202124;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 32px;
+            background: white;
+            box-shadow: 0 0 18px rgba(0,0,0,0.08);
+        }
+        h1, h2, h3 {
+            color: #0b3d91;
+            margin-top: 1.6em;
+        }
+        pre {
+            background: #eef2fb;
+            padding: 14px;
+            border-left: 4px solid #0b3d91;
+            overflow-x: auto;
+        }
+        code {
+            background: #e8f0fe;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        .section {
+            margin-bottom: 24px;
+        }
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #f0ad4e;
+            padding: 12px 16px;
+            margin: 16px 0;
+        }
+        .sidebar {
+            background: #f9fafb;
+            padding: 16px;
+            border: 1px solid #d8dde6;
+            margin: 16px 0;
+        }
+        a {
+            color: #0b3d91;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Documentación del Proyecto: Visor de Mapas Leaflet</h1>
+
+        <section class="section">
+            <h2>Resumen</h2>
+            <p>Este proyecto es el <strong>Visor CAP</strong> (Consejo Agrario Provincial), un visor de mapas basado en <strong>Leaflet.js</strong> que carga capas WFS desde <code>api.ellipsis-drive.com</code> y ofrece varias capas base tipo IGN y satelital.</p>
+            <p>El visor incluye un header institucional con branding del CAP y un panel lateral de capas con estilos acordes a la identidad visual de la provincia.</p>
+            <p>La estructura del proyecto se mantiene en cuatro archivos: <code>index.html</code>, <code>js/map.js</code>, <code>js/layers.js</code> y <code>css/styles.css</code>.</p>
+        </section>
+
+        <section class="section">
+            <h2>Estructura de archivos</h2>
+            <ul>
+                <li><strong>index.html</strong>: archivo principal con header institucional, contenedor del mapa y panel de capas.</li>
+                <li><strong>js/map.js</strong>: inicializa el mapa, define capas base Argenmap/satelital y controla la UI de capas.</li>
+                <li><strong>js/layers.js</strong>: define las capas WFS, maneja <code>GetCapabilities</code>, carga GeoJSON y aplica estilos y leyendas.</li>
+                <li><strong>css/styles.css</strong>: estilos del visor con paleta de colores CAP (verde), header, panel de capas y leyenda.</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2>Branding CAP</h2>
+            <p>El visor incluye:</p>
+            <ul>
+                <li><strong>Header institucional</strong> con logo del Consejo Agrario Provincial (70px de altura fijo).</li>
+                <li><strong>Paleta de colores</strong>: verde CAP (`#6ba043`, `#5a8f38`) para header, panel y elementos interactivos.</li>
+                <li><strong>Título</strong>: "Visor CAP" en el header institucional.</li>
+                <li><strong>Logo</strong>: `https://cap.santacruz.gob.ar/img/logo-dark.png`</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2>Capas WFS</h2>
+            <p>El visor actualmente expone tres capas WFS configuradas en <code>js/layers.js</code>:</p>
+            <ul>
+                <li><strong>Delegaciones CAP</strong> (servicio WFS principal).</li>
+                <li><strong>Comisiones de Fomento</strong> (misma API WFS, con token diferente).</li>
+                <li><strong>Bosques Nativos</strong> (estilo por clasificación <code>tipo_bn</code> y leyenda de especies).</li>
+            </ul>
+            <p>La lógica de WFS usa <code>GetCapabilities</code> para obtener el primer <code>FeatureType</code> y luego solicita <code>GetFeature</code> en formato GeoJSON.</p>
+            <p>Se implementó una caché de capacidades y un prefetch inicial para acelerar la carga de capas WFS posteriores.</p>
+        </section>
+
+        <section class="section">
+            <h2>Mapas base</h2>
+            <p>Las capas base disponibles son:</p>
+            <ul>
+                <li><strong>Argenmap</strong> (base IGN Argentina).</li>
+                <li><strong>Argenmap (gris)</strong></li>
+                <li><strong>Argenmap (topográfico)</strong></li>
+                <li><strong>Argenmap (oscuro)</strong></li>
+                <li><strong>Satelital</strong> (ESRI World Imagery).</li>
+            </ul>
+            <p>Estas capas se agregan en <code>js/map.js</code> usando <code>L.tileLayer</code> y se presentan en el control de capas de Leaflet.</p>
+        </section>
+
+        <section class="section">
+            <h2>Decisiones de diseño</h2>
+            <div class="note">
+                <strong>Nota:</strong> aquí se documentan los objetivos y cambios importantes del proyecto.
+            </div>
+            <ul>
+                <li>Integrar branding institucional del CAP con header fijo y colores corporativos.</li>
+                <li>Mantener separación clara entre mapa y definición de capas WFS.</li>
+                <li>Usar capas base de Argenmap para replicar la experiencia de SITU Santa Cruz.</li>
+                <li>Agregar soporte visual para leyendas de clasificación en Bosques Nativos.</li>
+                <li>Optimizar la carga WFS con caché de <code>GetCapabilities</code> y prefetch.</li>
+            </ul>
+        </section>
+
+        <section class="section sidebar">
+            <h3>Uso</h3>
+            <ol>
+                <li>Abre <code>index.html</code> en un navegador moderno.</li>
+                <li>El visor carga con el header del CAP y el control de capas en la esquina superior izquierda.</li>
+                <li>Selecciona la capa base desde el control de capas en la esquina superior derecha.</li>
+                <li>Activa la capa WFS deseada desde el panel de capas laterales (botón con icono de capas).</li>
+                <li>La primera carga WFS puede tardar algunos segundos; las siguientes deben ser más rápidas gracias a la caché.</li>
+            </ol>
+        </section>
+
+        <section class="section">
+            <h2>Prompts clave para replicar</h2>
+            <p>Este documento resume los pasos principales realizados para llegar al estado actual del visor.</p>
+            <ol>
+                <li>Crear un visor Leaflet con estructura de archivo separada.</li>
+                <li>Agregar header institucional con logo y titulo "Visor CAP".</li>
+                <li>Implementar panel de capas lateral con controles WFS.</li>
+                <li>Definir capas WFS en <code>js/layers.js</code> con URL, token y estilos.</li>
+                <li>Implementar carga de WFS basada en <code>GetCapabilities</code> y <code>GetFeature</code>.</li>
+                <li>Aplicar paleta de colores del CAP (verde corporativo).</li>
+                <li>Mejorar velocidad con caché de capacidades y prefetch.</li>
+            </ol>
+        </section>
+    </div>
+    </div>
+</body>
+</html>
