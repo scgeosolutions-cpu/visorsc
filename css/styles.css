@@ -1,0 +1,113 @@
+/* Pantalla completa */
+body, html, #map { height: 100%; margin: 0; font-family: 'Segoe UI', sans-serif; }
+#map { width: 100%; z-index: 1; position: relative; top: 70px; height: calc(100% - 70px); }
+
+/* Header Institucional */
+.header {
+    position: fixed; top: 0; left: 0; width: 100%; height: 70px; z-index: 3000;
+    background: linear-gradient(135deg, #6ba043 0%, #5a8f38 100%);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    display: flex; align-items: center; padding: 0 20px;
+}
+
+.header-content {
+    display: flex; align-items: center; gap: 16px;
+}
+
+.header-logo {
+    height: 50px; width: auto;
+}
+
+.header-title {
+    color: white; margin: 0; font-size: 24px; font-weight: 700;
+}
+
+/* Botón de Capas */
+.floating-btn {
+    position: absolute; top: 90px; left: 20px; z-index: 1000;
+    background: white; border: 2px solid #6ba043; padding: 10px; border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3); cursor: pointer;
+}
+
+.floating-btn img {
+    display: block;
+    width: 22px;
+    height: 22px;
+}
+
+/* Panel Lateral */
+.sidebar {
+    position: fixed; top: 70px; left: -320px; width: 300px; height: calc(100% - 70px);
+    background: white; z-index: 2000; transition: left 0.3s ease;
+    box-shadow: 3px 0 10px rgba(0,0,0,0.2); overflow-y: auto;
+}
+
+.sidebar.active { left: 0; }
+
+.sidebar-header {
+    padding: 15px; background: linear-gradient(135deg, #6ba043 0%, #5a8f38 100%); color: white;
+    display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0;
+}
+
+.sidebar-header h2 {
+    margin: 0; font-size: 18px; font-weight: 700;
+}
+
+#close-sidebar {
+    background: none; border: 1px solid white; color: white;
+    cursor: pointer; padding: 2px 8px; border-radius: 3px; font-size: 20px;
+}
+
+.layer-list {
+    padding: 12px 0;
+}
+
+/* Items de la lista */
+.layer-item {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.layer-item:hover { background: #f0f8f4; }
+
+.layer-item label {
+    margin-left: 8px; cursor: pointer; color: #2d5a3d; font-weight: 600;
+}
+
+.layer-item input { transform: scale(1.15); cursor: pointer; accent-color: #6ba043; }
+
+.layer-item small {
+    display: block;
+    margin-top: 4px;
+    color: #666;
+    line-height: 1.4;
+    font-size: 0.85rem;
+}
+
+.layer-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 0;
+    font-size: 0.88rem;
+    color: #3a3a3a;
+}
+
+.legend-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    display: inline-block;
+    border: 1px solid rgba(0,0,0,0.15);
+}
+
