@@ -19,18 +19,38 @@
 
     <div id="sidebar" class="sidebar">
         <div class="sidebar-header">
-            <h2>Capas</h2>
+            <div>
+                <h2>Capas</h2>
+                <p>Selecciona y activa capas del visor</p>
+            </div>
             <button id="close-sidebar">×</button>
         </div>
-        <div id="layer-list" class="layer-list">
+        <div class="sidebar-tools">
+            <div class="tool-row">
+                <div class="search-box">
+                    <input id="layer-search" type="search" placeholder="Buscar capa" aria-label="Buscar capa">
+                </div>
+                <div class="actions-row">
+                    <button id="hide-sidebar-btn" type="button" class="action-icon" title="Ocultar panel">👁</button>
+                    <button id="base-map-btn" type="button" class="action-icon" title="Mapas base">🗺</button>
+                    <button id="add-layer-btn" type="button" class="action-icon" title="Agregar capa">+</button>
+                </div>
             </div>
+            <div id="base-map-selector" class="base-map-selector"></div>
+            <input id="file-input" type="file" accept=".kml,.geojson,.gpx,.zip,.txt,.wkt,.json" hidden>
+        </div>
+        <div id="layer-list" class="layer-list"></div>
     </div>
 
     <button id="menu-toggle" class="floating-btn" title="Mostrar capas">
-        <img src="https://img.icons8.com/material-rounded/24/1e3a8a/layer-group.png" alt="Capas">
+        <img src="assets\layer-group.svg" alt="Capas">
     </button>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/topojson-client@3/dist/topojson-client.min.js"></script>
+    <script src="https://unpkg.com/togeojson@0.16.0/dist/togeojson.min.js"></script>
+    <script src="https://unpkg.com/wellknown@0.5.0/wellknown.min.js"></script>
+    <script src="https://unpkg.com/shpjs@3.4.0/dist/shp.min.js"></script>
     <script src="js/layers.js"></script>
     <script src="js/map.js"></script>
 </body>
