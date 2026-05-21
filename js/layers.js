@@ -1,5 +1,8 @@
+// Contenedor para capas tipo overlay cargadas manualmente o desde archivos locales
 const overlayLayers = {};
 
+// Definición de capas disponibles en el visor
+// Cada capa puede ser de tipo 'wfs' (servicio WFS) u 'overlay' (GeoJSON local/cargado)
 const layerControls = [
     {
         name: 'Delegaciones CAP',
@@ -22,6 +25,7 @@ const layerControls = [
         description: 'Capa WFS de Bosques Nativos.',
         serviceUrl: 'https://api.ellipsis-drive.com/v3/ogc/wfs/d68a159e-96c5-465e-9c97-f15156f578fe',
         token: 'epat_PxesPBesBU0MklNoHPTpJ03zW1VCruSEISPtUMjjRRZq62ARpmQ0TMlHNY7ej7p7',
+        // Mapa de leyenda para asignar colores a las categorías de Bosques Nativos
         legendMap: {
             'Lenga': '#d12a2a',
             'Guindo': '#4f5ee1',
@@ -31,6 +35,7 @@ const layerControls = [
             'ñire': '#8c3aba',
             'Sin clasificación': '#8a8a8a'
         },
+        // Estilo dinámico que clasifica el bosque según la propiedad tipo_bn
         style(feature) {
             const props = feature?.properties || {};
             const key = Object.keys(props).find((k) => /tipo.*bn/i.test(k));
@@ -76,8 +81,10 @@ const layerControls = [
     }
 ];
 
+// Cache de las respuestas GetCapabilities para evitar múltiples solicitudes al mismo servicio WFS
 const wfsCapabilitiesCache = new Map();
 
+// Obtiene los nombres de FeatureType disponibles a partir del GetCapabilities del WFS
 async function getWfsTypeNames(layerData) {
     const cacheKey = layerData.serviceUrl;
     if (wfsCapabilitiesCache.has(cacheKey)) {
@@ -85,6 +92,7 @@ async function getWfsTypeNames(layerData) {
     }
 
     const fetchPromise = (async () => {
+        // Construye la URL del GetCapabilities con token y obtiene el XML del servicio
         const capabilitiesUrl = `${layerData.serviceUrl}?request=getCapabilities&token=${encodeURIComponent(layerData.token)}`;
         const response = await fetch(capabilitiesUrl);
         const text = await response.text();
@@ -105,6 +113,7 @@ async function getWfsTypeNames(layerData) {
     }
 }
 
+// Solicita los features WFS en formato GeoJSON usando el tipo de capa seleccionado
 async function fetchWfsGeoJson(layerData, typeName) {
     const url = new URL(layerData.serviceUrl);
     url.search = new URLSearchParams({
