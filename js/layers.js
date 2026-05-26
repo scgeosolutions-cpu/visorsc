@@ -8,8 +8,8 @@ const layerControls = [
         name: 'Delegaciones CAP',
         type: 'wfs',
         description: 'Consume GetCapabilities y carga la primera capa WFS disponible como GeoJSON.',
-        serviceUrl: 'https://api.ellipsis-drive.com/v3/ogc/wfs/e83a620a-8494-4fc0-8a07-f3616230aa19',
-        token: 'epat_sQ496mPZpMuWEC3MAat8to13yxOXZ0vxUWI2qKbucGUusvzp6t2IjhUBYezuilHW',
+        serviceUrl: 'https://api.ellipsis-drive.com/v3/ogc/wfs/e0d424fc-4c6d-4db9-af5c-93fe257bfe52',
+        token: 'epat_Mrf5BTJht8ARdpNr2iweuytv0bPllQfgOz8nZGr9xwG1ZFeGBewo30nefqC3m6GE',
         style: function(feature) {
             return {
                 color: '#5a8f38',
