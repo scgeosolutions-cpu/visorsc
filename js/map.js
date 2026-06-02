@@ -254,7 +254,6 @@ const btnDrawRectangle = document.getElementById('draw-rectangle');
 const btnDrawCircle = document.getElementById('draw-circle');
 const btnDrawMarker = document.getElementById('draw-marker');
 const btnClearAll = document.getElementById('btn-clear-all');
-const btnExportar = document.getElementById('btn-exportar');
 const btnZoomIn = document.getElementById('zoom-in');
 const btnZoomHome = document.getElementById('zoom-home');
 const btnZoomOut = document.getElementById('zoom-out');
@@ -614,8 +613,8 @@ function startDrawMode(mode) {
                     properties: props,
                     geometry: { type: 'Point', coordinates: [e.latlng.lng, e.latlng.lat] }
                 };
-                createFinalFeature(marker, 'Point', feature.geometry.coordinates);
-                marker.feature = feature;
+                // Registrar la feature directamente para conservar `props.text` y agruparla como Text
+                addFeatureToDrawnLayer(marker, feature);
                 updateTextMarkerIcon(marker);
             }
             resetModes();
@@ -755,26 +754,51 @@ function removeGrid() {
 
 // Exporta los dibujos actuales en el mapa a un archivo GeoJSON descargable
 function exportDrawnGeoJSON() {
-    const features = [];
-    drawnLayers.eachLayer((layer) => {
-        if (layer.feature) {
-            features.push(layer.feature);
+    // Agrupar features por tipo de grupo (Text, Point, etc.)
+    const groups = {};
+    Object.keys(drawnGroups).forEach((groupKey) => {
+        groups[groupKey] = [];
+        drawnGroups[groupKey].layers.forEach((layer) => {
+            if (layer.feature) groups[groupKey].push(layer.feature);
+        });
+    });
+
+    const downloads = [];
+    if (groups['Text'] && groups['Text'].length) {
+        downloads.push({ features: groups['Text'], filename: 'textos_visor' });
+    }
+    if (groups['Point'] && groups['Point'].length) {
+        downloads.push({ features: groups['Point'], filename: 'puntos_visor' });
+    }
+
+    // Agrupar cualquier otro tipo restante en un archivo separado
+    const otherFeatures = [];
+    Object.keys(groups).forEach((k) => {
+        if (k !== 'Text' && k !== 'Point') {
+            otherFeatures.push(...groups[k]);
         }
     });
-    if (!features.length) {
+    if (otherFeatures.length) {
+        downloads.push({ features: otherFeatures, filename: 'dibujos_otros' });
+    }
+
+    if (!downloads.length) {
         alert('No hay elementos para exportar.');
         return;
     }
-    const data = JSON.stringify({ type: 'FeatureCollection', features }, null, 2);
-    const blob = new Blob([data], { type: 'application/json;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'capas_visor.geojson';
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
+
+    downloads.forEach(({ features, filename }) => {
+        const data = JSON.stringify({ type: 'FeatureCollection', features }, null, 2);
+        const blob = new Blob([data], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${filename}.geojson`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+    });
 }
 
 // Centra el mapa en la ubicación geolocalizada del usuario
@@ -833,12 +857,24 @@ btnClearAll?.addEventListener('click', function () {
         alert('Selecciona un dibujo para eliminarlo.');
         return;
     }
-    if (confirm('¿Eliminar el dibujo seleccionado?')) {
-        drawnLayers.removeLayer(selectedLayer);
-        deselectLayer(selectedLayer);
+    if (!confirm('¿Eliminar el dibujo seleccionado?')) {
+        return;
     }
+    const layerToRemove = selectedLayer;
+    deselectLayer(layerToRemove);
+    if (drawnLayers.hasLayer(layerToRemove)) {
+        drawnLayers.removeLayer(layerToRemove);
+    } else if (typeof layerToRemove.remove === 'function') {
+        layerToRemove.remove();
+    }
+    if (layerToRemove._drawnName) {
+        drawnLayersMap.delete(layerToRemove._drawnName);
+    }
+    if (layerToRemove._drawnType && drawnGroups[layerToRemove._drawnType]) {
+        drawnGroups[layerToRemove._drawnType].layers.delete(layerToRemove);
+    }
+    renderLayerList(layerSearch.value);
 });
-btnExportar?.addEventListener('click', exportDrawnGeoJSON);
 
 function getLayerTransparency(name) {
     return layerTransparency.has(name) ? layerTransparency.get(name) : 1;
@@ -1174,6 +1210,7 @@ function addWmsLayer(serviceUrl, layerName, layerTitle) {
     layerControls.push({
         name: uniqueName,
         type: 'overlay',
+        isWms: true,
         description: `Capa WMS cargada: ${layerTitle}`
     });
     renderLayerList(layerSearch.value);
@@ -1576,7 +1613,7 @@ function createLayerItem(layerData) {
     header.appendChild(checkbox);
     layerItem.appendChild(header);
 
-    if (layerData.type === 'overlay') {
+    if (layerData.type === 'overlay' && !layerData.isWms) {
         const actions = document.createElement('div');
         actions.className = 'layer-actions';
 
@@ -1604,6 +1641,27 @@ function createLayerItem(layerData) {
         attrButton.textContent = '≡';
         attrButton.addEventListener('click', () => openAttributeTableForOverlay(layerData));
         actions.appendChild(attrButton);
+
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.className = 'layer-action-btn';
+        deleteButton.title = 'Eliminar capa';
+        deleteButton.textContent = '✕';
+        deleteButton.addEventListener('click', () => deleteOverlayLayer(layerData));
+        actions.appendChild(deleteButton);
+
+        layerItem.appendChild(actions);
+    } else if (layerData.type === 'overlay' && layerData.isWms) {
+        const actions = document.createElement('div');
+        actions.className = 'layer-actions';
+
+        const zoomButton = document.createElement('button');
+        zoomButton.type = 'button';
+        zoomButton.className = 'layer-action-btn';
+        zoomButton.title = 'Zoom a capa';
+        zoomButton.textContent = '🔎';
+        zoomButton.addEventListener('click', () => zoomToLayer(layerData));
+        actions.appendChild(zoomButton);
 
         const deleteButton = document.createElement('button');
         deleteButton.type = 'button';
@@ -1713,7 +1771,13 @@ function createDrawnGroupItem(groupKey, groupData) {
 
     const label = document.createElement('div');
     label.className = 'layer-name';
-    label.textContent = `${getDrawnGroupLabel(groupData)} (${groupData.layers.size})`;
+    const labelText = document.createElement('span');
+    labelText.textContent = getDrawnGroupLabel(groupData);
+    const labelCount = document.createElement('span');
+    labelCount.className = 'layer-count';
+    labelCount.textContent = `(${groupData.layers.size})`;
+    label.appendChild(labelText);
+    label.appendChild(labelCount);
     label.title = groupData.description;
     titleWrapper.appendChild(label);
 
